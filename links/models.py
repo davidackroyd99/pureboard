@@ -12,3 +12,4 @@ class Link(models.Model):
 class Vote(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     link = models.ForeignKey('links.Link', related_name='votes', on_delete=models.CASCADE)
+    score = models.IntegerField(default=1)

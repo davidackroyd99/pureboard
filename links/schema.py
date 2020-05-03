@@ -1,7 +1,7 @@
 import graphene
 from graphene_django import DjangoObjectType
 
-from .models import Link
+from .models import Link, Vote
 
 
 class LinkType(DjangoObjectType):
