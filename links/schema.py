@@ -2,7 +2,7 @@ import graphene
 from graphene_django import DjangoObjectType
 from django.db.models import Q
 
-from .models import Link, Vote
+from .models import Link, Vote, Profile
 from users.schema import UserType
 
 class LinkType(DjangoObjectType):
@@ -13,6 +13,11 @@ class LinkType(DjangoObjectType):
 class VoteType(DjangoObjectType):
     class Meta:
         model = Vote
+
+
+class ProfileType(DjangoObjectType):
+    class Meta:
+        model = Profile
 
 
 class Query(graphene.ObjectType):
