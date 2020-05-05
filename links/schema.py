@@ -80,11 +80,16 @@ class CreateVote(graphene.Mutation):
         if not link:
             raise Exception('Invalid Link!')
 
-        Vote.objects.create(
-            user=user,
-            link=link,
-            score=score
-        )
+        vote = Vote.objects.filter(link=link, user=info.context.user).first()
+        if not vote:
+            Vote.objects.create(
+                user=user,
+                link=link,
+                score=score
+            )
+        else:
+            vote.score = score
+            vote.save()
 
         return CreateVote(user=user, link=link)
 
