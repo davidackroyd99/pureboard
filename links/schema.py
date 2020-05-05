@@ -88,8 +88,11 @@ class CreateVote(graphene.Mutation):
                 score=score
             )
         else:
-            vote.score = score
-            vote.save()
+            if vote.score != score:
+                vote.score = score
+                vote.save()
+            else:
+                vote.delete()
 
         return CreateVote(user=user, link=link)
 
