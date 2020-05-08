@@ -2,7 +2,7 @@ import graphene
 from graphene_django import DjangoObjectType
 from django.db.models import Q
 
-from .models import Link, Vote, Profile
+from .models import Link, Vote
 from users.schema import UserType
 
 class LinkType(DjangoObjectType):
@@ -13,11 +13,6 @@ class LinkType(DjangoObjectType):
 class VoteType(DjangoObjectType):
     class Meta:
         model = Vote
-
-
-class ProfileType(DjangoObjectType):
-    class Meta:
-        model = Profile
 
 
 class Query(graphene.ObjectType):
@@ -71,16 +66,8 @@ class CreateVote(graphene.Mutation):
         link_id = graphene.Int(required=True)
         score = graphene.Int()
 
-    def mutate(self, info, link_id, score=1):
-        user = info.context.user
-        if user.is_anonymous:
-            raise Exception('You must be logged to vote!')
-
-        link = Link.objects.filter(id=link_id).first()
-        if not link:
-            raise Exception('Invalid Link!')
-
-        vote = Vote.objects.filter(link=link, user=info.context.user).first()
+    def create_vote(self, link, user, score):
+        vote = Vote.objects.filter(link=link, user=user).first()
         if not vote:
             Vote.objects.create(
                 user=user,
@@ -94,6 +81,16 @@ class CreateVote(graphene.Mutation):
             else:
                 vote.delete()
 
+    def mutate(self, info, link_id, score=1):
+        user = info.context.user
+        if user.is_anonymous:
+            raise Exception('You must be logged to vote!')
+
+        link = Link.objects.filter(id=link_id).first()
+        if not link:
+            raise Exception('Invalid Link!')
+        
+        self.create_vote(link, user, score)
         return CreateVote(user=user, link=link)
 
 
