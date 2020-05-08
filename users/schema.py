@@ -3,25 +3,34 @@ from django.contrib.auth import get_user_model
 import graphene
 from graphene_django import DjangoObjectType
 
+from links.models import Vote
 
 class UserType(DjangoObjectType):
     class Meta:
         model = get_user_model()
+    
+    def resolve_karma(parent, info):
+        return sum(vote.score for vote in Vote.objects.filter(user_id=parent.id))
 
+    karma = graphene.Int()
 
 class Query(graphene.ObjectType):
     me = graphene.Field(UserType)
-    users = graphene.List(UserType)
+    users = graphene.List(UserType, karma=graphene.Int())
 
     def resolve_users(self, info):
-        return get_user_model().objects.all()
+        users = get_user_model().objects.all()
+
+        return users
 
     def resolve_me(self, info):
         user = info.context.user
+
         if user.is_anonymous:
             raise Exception('Not logged in!')
 
         return user
+
 
 class CreateUser(graphene.Mutation):
     user = graphene.Field(UserType)
