@@ -64,9 +64,8 @@ class CreateVote(graphene.Mutation):
 
     class Arguments:
         link_id = graphene.Int(required=True)
-        score = graphene.Int()
 
-    def mutate(self, info, link_id, score=1):
+    def mutate(self, info, link_id):
         user = info.context.user
         if user.is_anonymous:
             raise Exception('You must be logged to vote!')
@@ -80,14 +79,9 @@ class CreateVote(graphene.Mutation):
             Vote.objects.create(
                 user=user,
                 link=link,
-                score=score
             )
         else:
-            if vote.score != score:
-                vote.score = score
-                vote.save()
-            else:
-                vote.delete()
+            vote.save()
 
         return CreateVote(user=user, link=link)
 

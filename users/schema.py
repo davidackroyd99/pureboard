@@ -3,14 +3,19 @@ from django.contrib.auth import get_user_model
 import graphene
 from graphene_django import DjangoObjectType
 
-from links.models import Vote
+from links.models import Vote, Link
 
 class UserType(DjangoObjectType):
     class Meta:
         model = get_user_model()
     
     def resolve_karma(parent, info):
-        return sum(vote.score for vote in Vote.objects.filter(user_id=parent.id))
+        karma = 0
+
+        for link in Link.objects.filter(posted_by=parent.id):
+            karma += len(Vote.objects.filter(link_id=link.id))
+        
+        return karma
 
     karma = graphene.Int()
 
